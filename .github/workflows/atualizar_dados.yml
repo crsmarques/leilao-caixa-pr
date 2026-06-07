@@ -1,0 +1,31 @@
+name: Atualizar Planilha Caixa
+
+on:
+  schedule:
+    - cron: '0 9 * * *' # Roda sozinho todo dia às 06:00 da manhã (Horário de Brasília)
+  workflow_dispatch: # Cria um botão para você poder forçar a atualização quando quiser
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Clonar Repositório
+      uses: actions/checkout@v3
+
+    - name: Configurar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Instalar Dependências
+      run: pip install pandas requests
+
+    - name: Rodar Script de Download
+      run: python baixar_planilha.py
+
+    - name: Salvar Planilha no Repositório
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add imoveis_pr_limpo.csv
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Dados atualizados de forma autônoma" && git push)
